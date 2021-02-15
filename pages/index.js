@@ -2,11 +2,14 @@ import Head from "next/head"
 import Layout, { siteTitle } from "../components/layout"
 
 export default function Home(props) {
-  const { stagingBuildText, prodBuildText, commits } = props
+  const { devBuildText, stagingBuildText, prodBuildText, commits } = props
+  const devRows = devBuildText.split("\n").filter((x) => x)
   const stagingRows = stagingBuildText.split("\n").filter((x) => x)
   const prodRows = prodBuildText.split("\n").filter((x) => x)
+  const devRef = devRows[6].slice(4)
   const stagingRef = stagingRows[6].slice(4)
   const prodRef = prodRows[6].slice(4)
+  let isOnDev = false
   let isOnStaging = false
   let isOnProd = false
   return (
@@ -21,6 +24,7 @@ export default function Home(props) {
             <th>Date</th>
             <th>SHA</th>
             <th>Link</th>
+            <th>On Dev?</th>
             <th>On Staging?</th>
             <th>On Prod?</th>
           </tr>
@@ -30,8 +34,10 @@ export default function Home(props) {
             const { commit = {}, html_url, sha } = x
             const { committer = {} } = commit
             const { date } = committer
+            if (sha === devRef) isOnDev = true
             if (sha === stagingRef) isOnStaging = true
             if (sha === prodRef) isOnProd = true
+            const onDevStyle = isOnDev ? { background: "green" } : {}
             const onStagingStyle = isOnStaging ? { background: "green" } : {}
             const onProdStyle = isOnProd ? { background: "green" } : {}
             return (
@@ -41,6 +47,7 @@ export default function Home(props) {
                 <td>
                   <a href={html_url}>GitHub</a>
                 </td>
+                <td style={onDevStyle}>{isOnDev ? "TRUE" : "FALSE"}</td>
                 <td style={onStagingStyle}>{isOnStaging ? "TRUE" : "FALSE"}</td>
                 <td style={onProdStyle}>{isOnProd ? "TRUE" : "FALSE"}</td>
               </tr>
@@ -50,6 +57,14 @@ export default function Home(props) {
       </table>
 
       <div style={{ display: "flex", justifyContent: "space-around" }}>
+        <div>
+          <h3>
+            Dev's BUILD.txt <a href="https://dev.va.gov/BUILD.txt">(Link)</a>
+          </h3>
+          {devRows.map((x) => {
+            return <div key={x}>{x}</div>
+          })}
+        </div>
         <div>
           <h3>
             Staging's BUILD.txt <a href="https://staging.va.gov/BUILD.txt">(Link)</a>
@@ -72,6 +87,9 @@ export default function Home(props) {
 }
 
 export async function getServerSideProps() {
+  const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
+  const devBuildText = await devBuildResponse.text()
+
   const stagingBuildResponse = await fetch("https://staging.va.gov/BUILD.txt")
   const stagingBuildText = await stagingBuildResponse.text()
 
@@ -83,6 +101,6 @@ export async function getServerSideProps() {
   const commitsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits`)
   const commits = await commitsResponse.json()
   return {
-    props: { stagingBuildText, prodBuildText, commits },
+    props: { devBuildText, stagingBuildText, prodBuildText, commits },
   }
 }
