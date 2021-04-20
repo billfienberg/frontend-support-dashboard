@@ -3,7 +3,7 @@ import Layout, { siteTitle } from "../components/layout"
 
 export default function Home(props) {
   const { devBuildText = "", stagingBuildText, prodBuildText, commits } = props
-  const devRows = devBuildText.split("\n").filter((x) => x)
+  const devRows = devBuildText.split("\n").filter((x) => x) || []
   const stagingRows = stagingBuildText.split("\n").filter((x) => x)
   const prodRows = prodBuildText.split("\n").filter((x) => x)
   const devRef = devRows[6].slice(4)
