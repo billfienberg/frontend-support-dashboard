@@ -2,7 +2,7 @@ import Head from "next/head"
 import Layout, { siteTitle } from "../components/layout"
 
 export default function Home(props) {
-  const { devBuildText, stagingBuildText, prodBuildText, commits } = props
+  const { devBuildText = "", stagingBuildText, prodBuildText, commits } = props
   const devRows = devBuildText.split("\n").filter((x) => x)
   const stagingRows = stagingBuildText.split("\n").filter((x) => x)
   const prodRows = prodBuildText.split("\n").filter((x) => x)
@@ -87,8 +87,8 @@ export default function Home(props) {
 }
 
 export async function getServerSideProps() {
-  const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
-  const devBuildText = await devBuildResponse.text()
+  // const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
+  // const devBuildText = await devBuildResponse.text()
 
   const stagingBuildResponse = await fetch("https://staging.va.gov/BUILD.txt")
   const stagingBuildText = await stagingBuildResponse.text()
