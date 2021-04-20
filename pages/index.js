@@ -101,6 +101,11 @@ export async function getServerSideProps() {
   const commitsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits`)
   const commits = await commitsResponse.json()
   return {
-    props: { devBuildText, stagingBuildText, prodBuildText, commits },
+    props: {
+      // devBuildText,
+      stagingBuildText,
+      prodBuildText,
+      commits,
+    },
   }
 }
