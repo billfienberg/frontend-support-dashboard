@@ -87,8 +87,8 @@ export default function Home(props) {
 }
 
 export async function getServerSideProps() {
-  // const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
-  // const devBuildText = await devBuildResponse.text()
+  const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
+  const devBuildText = await devBuildResponse.text()
 
   const stagingBuildResponse = await fetch("https://staging.va.gov/BUILD.txt")
   const stagingBuildText = await stagingBuildResponse.text()
@@ -102,7 +102,7 @@ export async function getServerSideProps() {
   const commits = await commitsResponse.json()
   return {
     props: {
-      // devBuildText,
+      devBuildText,
       stagingBuildText,
       prodBuildText,
       commits,
