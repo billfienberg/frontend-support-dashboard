@@ -1,6 +1,20 @@
 import Head from "next/head"
 import Layout, { siteTitle } from "../components/layout"
 
+// https://github.com/department-of-veterans-affairs/vets-website/blob/1cee564813462d6fe3896a10e477016f7cac2ebd/jenkins/common.groovy#L316
+const vetsWebsiteBuildTexts = {
+  dev: "https://dev-va-gov-assets.s3-us-gov-west-1.amazonaws.com/BUILD.txt",
+  staging: "http://staging-va-gov-assets.s3-us-gov-west-1.amazonaws.com/BUILD.txt",
+  prod: "https://prod-va-gov-assets.s3-us-gov-west-1.amazonaws.com/BUILD.txt",
+}
+
+// https://github.com/department-of-veterans-affairs/content-build/blob/844d3170a92005dbee70a7ecf643362137ba68c3/jenkins/common.groovy#L280
+const contentBuildBuildTexts = {
+  dev: "https://dev.va.gov/BUILD.txt",
+  staging: "https://staging.va.gov/BUILD.txt",
+  prod: "https://www.va.gov/BUILD.txt",
+}
+
 export default function Home(props) {
   const { devBuildText = "", stagingBuildText, prodBuildText, commits } = props
   const devRows = devBuildText.split("\n").filter((x) => x) || []
@@ -12,7 +26,7 @@ export default function Home(props) {
   let isOnDev = false
   let isOnStaging = false
   let isOnProd = false
-  console.log("TESTING")
+
   return (
     <Layout>
       <Head>
@@ -60,7 +74,7 @@ export default function Home(props) {
       <div style={{ display: "flex", justifyContent: "space-around" }}>
         <div>
           <h3>
-            Dev's BUILD.txt <a href="https://dev.va.gov/BUILD.txt">(Link)</a>
+            Dev's BUILD.txt <a href={vetsWebsiteBuildTexts.dev}>(Link)</a>
           </h3>
           {devRows.map((x) => {
             return <div key={x}>{x}</div>
@@ -68,7 +82,7 @@ export default function Home(props) {
         </div>
         <div>
           <h3>
-            Staging's BUILD.txt <a href="https://staging.va.gov/BUILD.txt">(Link)</a>
+            Staging's BUILD.txt <a href={vetsWebsiteBuildTexts.staging}>(Link)</a>
           </h3>
           {stagingRows.map((x) => {
             return <div key={x}>{x}</div>
@@ -76,7 +90,7 @@ export default function Home(props) {
         </div>
         <div>
           <h3>
-            Prod's BUILD.txt <a href="https://www.va.gov/BUILD.txt">(Link)</a>
+            Prod's BUILD.txt <a href={vetsWebsiteBuildTexts.prod}>(Link)</a>
           </h3>
           {prodRows.map((x) => {
             return <div key={x}>{x}</div>
@@ -89,17 +103,25 @@ export default function Home(props) {
 
 // https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering
 export async function getServerSideProps() {
-  const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
+  // BUILD.txt info for each environment
+
+  // TODO: Handle errors
+  const devBuildResponse = await fetch(vetsWebsiteBuildTexts.dev)
   const devBuildText = await devBuildResponse.text()
 
-  const stagingBuildResponse = await fetch("https://staging.va.gov/BUILD.txt")
+  // TODO: Handle errors
+  const stagingBuildResponse = await fetch(vetsWebsiteBuildTexts.staging)
   const stagingBuildText = await stagingBuildResponse.text()
 
-  const prodBuildResponse = await fetch("https://www.va.gov/BUILD.txt")
+  // TODO: Handle errors
+  const prodBuildResponse = await fetch(vetsWebsiteBuildTexts.prod)
   const prodBuildText = await prodBuildResponse.text()
 
+  // last 30 commits from vets-website
   const owner = "department-of-veterans-affairs"
   const repo = "vets-website"
+
+  // TODO: Handle errors
   const commitsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits`)
   const commits = await commitsResponse.json()
   return {
