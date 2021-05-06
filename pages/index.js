@@ -12,6 +12,7 @@ export default function Home(props) {
   let isOnDev = false
   let isOnStaging = false
   let isOnProd = false
+  console.log("TESTING")
   return (
     <Layout>
       <Head>
@@ -86,6 +87,7 @@ export default function Home(props) {
   )
 }
 
+// https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering
 export async function getServerSideProps() {
   const devBuildResponse = await fetch("https://dev.va.gov/BUILD.txt")
   const devBuildText = await devBuildResponse.text()
