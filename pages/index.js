@@ -37,6 +37,7 @@ export default function Home(props) {
         <thead>
           <tr>
             <th>Date</th>
+            <th>Message</th>
             <th>SHA</th>
             <th>Link</th>
             <th>On Dev?</th>
@@ -47,7 +48,7 @@ export default function Home(props) {
         <tbody>
           {commits.map((x) => {
             const { commit = {}, html_url, sha } = x
-            const { committer = {} } = commit
+            const { committer = {}, message } = commit
             const { date } = committer
             if (sha === devRef) isOnDev = true
             if (sha === stagingRef) isOnStaging = true
@@ -58,6 +59,7 @@ export default function Home(props) {
             return (
               <tr key={sha}>
                 <td>{date}</td>
+                <td>{message.slice(0, 50)}...</td>
                 <td>{sha}</td>
                 <td>
                   <a href={html_url}>GitHub</a>
@@ -122,6 +124,7 @@ export async function getServerSideProps() {
   const repo = "vets-website"
 
   // TODO: Handle errors
+  // TODO: Handle rate-limiting (unauthenticated requests are limited to 60 per hour)
   const commitsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits`)
   const commits = await commitsResponse.json()
   return {

@@ -20,6 +20,8 @@ Find the most recent version of this guide at [here](https://github.com/segmenti
 - [Syntax Highlighting](#syntax-highlighting)
 - [Deploy to Now](#deploy-to-now)
 - [Something Missing?](#something-missing)
+- [How do we determine if a commit is on a specific environment?](#how-do-we-determine-if-a-commit-is-on-a-specific-environment)
+- [Why are we using Next.js?](#why-are-we-using-nextjs)
 
 ## Questions? Feedback?
 
@@ -84,7 +86,6 @@ The application should be compiled with \`next build\` first.
 
 See the section in Next docs about [deployment](https://github.com/zeit/next.js/wiki/Deployment) for more information.
 
-
 ## Adding Components
 
 We recommend keeping React components in `./components` and they should look like:
@@ -100,11 +101,11 @@ export default Simple // don't forget to export default!
 ### `./components/complex.js`
 
 ```jsx
-import { Component } from 'react'
+import { Component } from "react"
 
 class Complex extends Component {
   state = {
-    text: 'World'
+    text: "World",
   }
 
   render() {
@@ -123,10 +124,10 @@ You can fetch data in `pages` components using `getInitialProps` like this:
 ### `./pages/stars.js`
 
 ```jsx
-const Page = props => <div>Next stars: {props.stars}</div>
+const Page = (props) => <div>Next stars: {props.stars}</div>
 
 Page.getInitialProps = async ({ req }) => {
-  const res = await fetch('https://api.github.com/repos/zeit/next.js')
+  const res = await fetch("https://api.github.com/repos/zeit/next.js")
   const json = await res.json()
   const stars = json.stargazers_count
   return { stars }
@@ -150,11 +151,11 @@ Typically you start your next server with `next start`. It's possible, however, 
 This example makes `/a` resolve to `./pages/b`, and `/b` resolve to `./pages/a`:
 
 ```jsx
-const { createServer } = require('http')
-const { parse } = require('url')
-const next = require('next')
+const { createServer } = require("http")
+const { parse } = require("url")
+const next = require("next")
 
-const dev = process.env.NODE_ENV !== 'production'
+const dev = process.env.NODE_ENV !== "production"
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
@@ -165,16 +166,16 @@ app.prepare().then(() => {
     const parsedUrl = parse(req.url, true)
     const { pathname, query } = parsedUrl
 
-    if (pathname === '/a') {
-      app.render(req, res, '/b', query)
-    } else if (pathname === '/b') {
-      app.render(req, res, '/a', query)
+    if (pathname === "/a") {
+      app.render(req, res, "/b", query)
+    } else if (pathname === "/b") {
+      app.render(req, res, "/a", query)
     } else {
       handle(req, res, parsedUrl)
     }
-  }).listen(3000, err => {
+  }).listen(3000, (err) => {
     if (err) throw err
-    console.log('> Ready on http://localhost:3000')
+    console.log("> Ready on http://localhost:3000")
   })
 })
 ```
@@ -206,3 +207,19 @@ You can find more details about [`now` here](https://zeit.co/now).
 ## Something Missing?
 
 If you have ideas for how we could improve this readme or the project in general, [let us know](https://github.com/segmentio/create-next-app/issues) or [contribute some!](https://github.com/segmentio/create-next-app/edit/master/lib/templates/default/README.md)
+
+## How do we determine if a commit is on a specific environment?
+
+1. We fetch the build text info
+1. We split the build text string on the `\n` character
+1. We grab the ref from the build text (currently the sixth line)
+1. We declare a variable to keep track of whether a `sha` is before/equal/after the current build.txt `ref`, and initialize it to `false`
+1. For each of the most recent 30 commits, we destructure the `sha` off the `commit`
+1. We compare each `sha` to each environment's `ref`
+1. Once a `sha` matches an environment `ref`, we update our variable from `false` to `true`
+1. And we can assume that every commit after that will also be deployed
+
+## Why are we using Next.js?
+
+- Client-side requests for the BUILD.txt are blocked by the VA's CORS
+- Client-side requests to GitHub's public REST API aren't blocked by CORS
